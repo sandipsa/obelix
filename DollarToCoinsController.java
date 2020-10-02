@@ -10,19 +10,16 @@ import org.apache.commons.lang3.StringUtils;
 
 @RestController
 public class DollarToCoinsController {
-
-	private static final String template = "Hello, %s!";
-	private final AtomicLong counter = new AtomicLong();
-
-	private CoinVendingService coinMachine;
+	
 	@AutoWired
+	private CoinVendingService coinMachine;
 	
 	@GetMapping("/dispenseCoinsForBills")
-	public String dispenseChangeForDollar(@RequestParam(value = "dollar", defaultValue = "1") String dollarAmount) {
+	public String dispenseChangeForDollar(@RequestParam(value = "dollar") String dollarAmount) {
 		if(!StringUtils.isNumeric(dollarAmount)){
 		  return "Please enter a numeric dollar amount";
 		}
-	  String coinDispensed = coinMachine.dispenseCoinsForBills(dollarAmount);
+	 	 String coinDispensed = coinMachine.dispenseCoinsForBills(dollarAmount);
 		return "Coins dispensed: " + coinDispensed;
 	}
 }
