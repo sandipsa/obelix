@@ -41,11 +41,12 @@ public class CoinVendingService{
 		return coinDispenseMap.get(coinType);
 	 }
 	 
-	 public Integer reduceCoinQuantity(String coinType, Integer deductQty){
-		coinDispenseMap.computeIfPresent(cointType, (key, oldValue) -> oldValue - deductQty);
+	 //ad-hoc method to add coins into the machine
+	 public Integer loadCoinsForType(String coinType, Integer addQty){
+		coinDispenseMap.computeIfPresent(cointType, (key, oldValue) -> oldValue + addQty);
 		return coinDispenseMap.get(coinType);
 	 }
-	 
+	 	 	 
 	 public int getAvailableBalance(){
 		int runningTotal = 0;
 		Integer coins = coinDispenseMap.get(COIN_QUARTERS);
@@ -80,13 +81,14 @@ public class CoinVendingService{
 		Integer qrtr, dim, nickl = null;
 		
 	    System.out.println("Dollar(s) to Coins Change");
-		
-		int DollarCount = 0;
-		if(!StringUtils.isNumeric(dollar)){
-		  return "Please enter a numeric dollar amount";
+				
+		try{
+		  cents = Interger.parseInt(dollar);
+		}catch(NumberFormatException nfEx){
+			 return "Please enter a numeric dollar amount. The value entered : " + dollar;
 		}
 		
-		cents = Interger.parseInt(dollar) * DOLLARS;
+		cents = cents * DOLLARS;
 		
 		int availableBal = getAvailableBalance();
 		System.out.println("Available Balance: " + availableBal);
@@ -107,32 +109,34 @@ public class CoinVendingService{
 				dim = coinDispenseMap.get(COIN_DIMES);
 				if(dim != null){
 					 
-					 numDimes = cents/DIMES;
+					 numDimes = centsLeft/DIMES;
 					 if(numDimes > dim){
 						numDimes = dim;
 					 }
-					 centsLeft = cents - numDimes*DIMES;
+					 centsLeft = centsLeft - numDimes*DIMES;
 				}
 				
 				if(centsLeft > 0 ){
 					nickl = coinDispenseMap.get(COIN_NICKELS);
 					if(nickl != null){
-						 numNickels = cents/NICKELS;
+						 numNickels = centsLeft/NICKELS;
 						 if(numNickels > nickl){
 							numNickels = nickl;
 						 }
-						 centsLeft = cents - numNickels*NICKELS;
+						 centsLeft = centsLeft - numNickels*NICKELS;
 					}
 				}
 			}//End of Quater
 			
-			reduceCoinQuantity(COIN_QUARTERS, numQuarters);
-			reduceCoinQuantity(COIN_DIMES, numDimes);
-			reduceCoinQuantity(COIN_NICKELS, numNickels);
-			reduceCoinQuantity(COIN_CENTS, centsLeft);
+			//Adjust the coin balance - atomic transaction
+			boolean hasCoinDispensed = adjustCoinQuantity(numQuarters, numDimes, numNickels, centsLeft);
+			if(!hasCoinDispensed){
+				System.out.println("Coin Machine doesn't have sufficient balance to dispense");
+				return "Coin Machine doesn't have sufficient balance to dispense";
+			}
 			
 			 // Log resulting number of coins
-			  System.out.print("For total cents of  " + cents);
+			  System.out.print("For total dollar of  $" + dollar);
 			  System.out.println(" coins dispensed:");
 			  
 			  System.out.println("#quarters = " + numQuarters);
@@ -162,10 +166,116 @@ public class CoinVendingService{
 		return sb.toString();
 	 }
 	 
-	 public static void main(String[] args){
+	 public boolean adjustCoinQuantity(int numQuarters, int numDimes, int numNickels, int numCents){
+		boolean isSuccessful = true;
+		coinDispenseMap.computeIfPresent(COIN_QUARTERS, (key, oldValue) -> oldValue - numQuarters);
+		coinDispenseMap.computeIfPresent(COIN_DIMES, (key, oldValue) -> oldValue - numDimes);
+		coinDispenseMap.computeIfPresent(COIN_NICKELS, (key, oldValue) -> oldValue - numNickels);
+		coinDispenseMap.computeIfPresent(COIN_CENTS, (key, oldValue) -> oldValue - numCents);
+		
+		if(coinDispenseMap.get(COIN_QUARTERS) < 0 || coinDispenseMap.get(COIN_DIMES) < 0 ||
+			coinDispenseMap.get(COIN_NICKELS) < 0  || coinDispenseMap.get(COIN_CENTS) < 0 ){
+			//Coin qty going in negative. Rollback the transaction
+			coinDispenseMap.computeIfPresent(COIN_QUARTERS, (key, oldValue) -> oldValue + numQuarters);
+			coinDispenseMap.computeIfPresent(COIN_DIMES, (key, oldValue) -> oldValue + numDimes);
+			coinDispenseMap.computeIfPresent(COIN_NICKELS, (key, oldValue) -> oldValue + numNickels);
+			coinDispenseMap.computeIfPresent(COIN_CENTS, (key, oldValue) -> oldValue + numCents);
+			isSuccessful = false;
+		}
+		return isSuccessful;
+	 }
+	 
+	 //Utility method to get max qty of coins
+	 public String dispenseMaxCoinsForDollar(String dollar){
 		  int cents = 0;
 		int numQuarters =0,             // number of dollars, quarters
           numDimes =0, numNickels = 0;                // number of dimes, nickels
+        int centsLeft = 0;
+		Integer qrtr, dim, nickl, penny = null;
+		
+	    System.out.println("Dollar(s) to Coins Change");
+				
+		try{
+		  cents = Interger.parseInt(dollar);
+		}catch(NumberFormatException nfEx){
+			 return "Please enter a numeric dollar amount. The value entered : " + dollar;
+		}
+		
+		cents = cents * DOLLARS;
+		int availableBal = getAvailableBalance();
+		System.out.println("Available Balance: " + availableBal);
+		
+		if(cents <= availableBal){
+			penny = coinDispenseMap.get(COIN_CENTS);
+			if(penny != null){
+		    	 centsLeft = cents - penny;
+			}
+			
+			if(centsLeft > 0 ){
+					nickl = coinDispenseMap.get(COIN_NICKELS);
+					if(nickl != null){
+						 numNickels = centsLeft/NICKELS;
+						 if(numNickels > nickl){
+							numNickels = nickl;
+						 }
+						 centsLeft = centsLeft - numNickels*NICKELS;
+					}
+				
+				if(centsLeft > 0 ){				
+					dim = coinDispenseMap.get(COIN_DIMES);
+					if(dim != null){
+						 
+						 numDimes = centsLeft/DIMES;
+						 if(numDimes > dim){
+							numDimes = dim;
+						 }
+						 centsLeft = centsLeft - numDimes*DIMES;
+					}
+					
+					qtr = coinDispenseMap.get(COIN_QUARTERS);
+					if(qrtr != null){
+						 // compute total quantities of quarter, dimes, nickels, and cents
+						 numQuarters = centsLeft/QUARTERS;
+						 if(numQuarters > qrtr){
+							numQuarters = qrtr;
+						 }
+						 centsLeft = centsLeft - numQuarters*QUARTERS;
+						 
+					}
+					
+					
+				}	
+			}
+			
+			if(centsLeft != 0){
+					System.out.println("Dispensing excess coins... ABorting");
+					return "Coin Machine doesn't have sufficient balance to dispense";
+			}
+			
+			//Adjust the coin balance - atomic transaction
+			boolean hasCoinDispensed = adjustCoinQuantity(numQuarters, numDimes, numNickels, penny);
+		
+			// Log resulting number of coins
+			  System.out.print("For total dollar of  $" + dollar);
+			  System.out.println(" coins dispensed:");
+			  
+			  System.out.println("#quarters = " + numQuarters);
+			  System.out.println("#dimes = " + numDimes);
+			  System.out.println("#nickels = " + numNickels);
+			  System.out.println("#pennies = " + penny);
+			  
+				
+		}else{
+			 System.out.println("Coin Machine doesn't have sufficient balance to dispense");
+		}
+		
+		
+	 }
+	 
+	 public static void main(String[] args){
+		  int cents = 0;
+		int numQuarters =0,             // number of quarters
+          numDimes =0, numNickels = 0;  // number of dimes, nickels
         int centsLeft = 0;
 		Integer qrtr, dim, nickl = null;
 		
