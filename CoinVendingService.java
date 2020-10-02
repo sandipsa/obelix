@@ -75,9 +75,9 @@ public class CoinVendingService{
 	 public String dispenseCoinsForBills(String dollar){
 	 
 	    int cents = 0;
-		int numQuarters =0,             // number of dollars, quarters
-          numDimes =0, numNickels = 0;                // number of dimes, nickels
-        int centsLeft = 0;
+            int numQuarters =0,             // number of quarters
+             numDimes =0, numNickels = 0;  // number of dimes, nickels
+            int centsLeft = 0;
 		Integer qrtr, dim, nickl = null;
 		
 	    System.out.println("Dollar(s) to Coins Change");
@@ -166,6 +166,8 @@ public class CoinVendingService{
 		return sb.toString();
 	 }
 	 
+         /** ad-hoc method to persist coin quantities. Ideally should have been done thru a Stored proc 
+	  */
 	 public boolean adjustCoinQuantity(int numQuarters, int numDimes, int numNickels, int numCents){
 		boolean isSuccessful = true;
 		coinDispenseMap.computeIfPresent(COIN_QUARTERS, (key, oldValue) -> oldValue - numQuarters);
@@ -185,10 +187,10 @@ public class CoinVendingService{
 		return isSuccessful;
 	 }
 	 
-	 //Utility method to get max qty of coins
+	 //Bonus Routine : Other utility method to get max qty of coins
 	 public String dispenseMaxCoinsForDollar(String dollar){
 		  int cents = 0;
-		int numQuarters =0,             // number of dollars, quarters
+		int numQuarters =0,             // number of quarters
           numDimes =0, numNickels = 0;                // number of dimes, nickels
         int centsLeft = 0;
 		Integer qrtr, dim, nickl, penny = null;
