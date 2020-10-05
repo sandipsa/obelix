@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.strereotype.Service;
+import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
 
 @Service
@@ -43,7 +43,7 @@ public class CoinVendingService{
 	 
 	 //ad-hoc method to add coins into the machine
 	 public Integer loadCoinsForType(String coinType, Integer addQty){
-		coinDispenseMap.computeIfPresent(cointType, (key, oldValue) -> oldValue + addQty);
+		coinDispenseMap.computeIfPresent(coinType, (key, oldValue) -> oldValue + addQty);
 		return coinDispenseMap.get(coinType);
 	 }
 	 	 	 
@@ -75,15 +75,15 @@ public class CoinVendingService{
 	 public String dispenseCoinsForBills(String dollar){
 	 
 	    int cents = 0;
-            int numQuarters =0,             // number of quarters
-             numDimes =0, numNickels = 0;  // number of dimes, nickels
-            int centsLeft = 0;
+		int numQuarters =0,             // number of dollars, quarters
+          numDimes =0, numNickels = 0;                // number of dimes, nickels
+        int centsLeft = 0;
 		Integer qrtr, dim, nickl = null;
 		
 	    System.out.println("Dollar(s) to Coins Change");
 				
 		try{
-		  cents = Interger.parseInt(dollar);
+		  cents = Integer.parseInt(dollar);
 		}catch(NumberFormatException nfEx){
 			 return "Please enter a numeric dollar amount. The value entered : " + dollar;
 		}
@@ -94,7 +94,7 @@ public class CoinVendingService{
 		System.out.println("Available Balance: " + availableBal);
 		
 		if(cents <= availableBal){
-			qtr = coinDispenseMap.get(COIN_QUARTERS);
+			qrtr = coinDispenseMap.get(COIN_QUARTERS);
 			if(qrtr != null){
 				 // compute total quantities of quarter, dimes, nickels, and cents
 				 numQuarters = cents/QUARTERS;
@@ -166,8 +166,6 @@ public class CoinVendingService{
 		return sb.toString();
 	 }
 	 
-         /** ad-hoc method to persist coin quantities. Ideally should have been done thru a Stored proc 
-	  */
 	 public boolean adjustCoinQuantity(int numQuarters, int numDimes, int numNickels, int numCents){
 		boolean isSuccessful = true;
 		coinDispenseMap.computeIfPresent(COIN_QUARTERS, (key, oldValue) -> oldValue - numQuarters);
@@ -187,10 +185,10 @@ public class CoinVendingService{
 		return isSuccessful;
 	 }
 	 
-	 //Bonus Routine : Other utility method to get max qty of coins
+	 //Utility method to get max qty of coins
 	 public String dispenseMaxCoinsForDollar(String dollar){
 		  int cents = 0;
-		int numQuarters =0,             // number of quarters
+		int numQuarters =0,             // number of dollars, quarters
           numDimes =0, numNickels = 0;                // number of dimes, nickels
         int centsLeft = 0;
 		Integer qrtr, dim, nickl, penny = null;
@@ -198,7 +196,7 @@ public class CoinVendingService{
 	    System.out.println("Dollar(s) to Coins Change");
 				
 		try{
-		  cents = Interger.parseInt(dollar);
+		  cents = Integer.parseInt(dollar);
 		}catch(NumberFormatException nfEx){
 			 return "Please enter a numeric dollar amount. The value entered : " + dollar;
 		}
@@ -234,7 +232,7 @@ public class CoinVendingService{
 						 centsLeft = centsLeft - numDimes*DIMES;
 					}
 					
-					qtr = coinDispenseMap.get(COIN_QUARTERS);
+					qrtr = coinDispenseMap.get(COIN_QUARTERS);
 					if(qrtr != null){
 						 // compute total quantities of quarter, dimes, nickels, and cents
 						 numQuarters = centsLeft/QUARTERS;
@@ -282,6 +280,7 @@ public class CoinVendingService{
 		Integer qrtr, dim, nickl = null;
 		
 		CoinVendingService coinMacine = new CoinVendingService();
+		coinMacine.coinDispenseMap = new ConcurrentHashMap<>();
 		coinMacine.coinDispenseMap.put("QUARTERS", 100);
 		coinMacine.coinDispenseMap.put("DIMES", 100);
 		coinMacine.coinDispenseMap.put("NICKELS", 100);
@@ -297,13 +296,21 @@ public class CoinVendingService{
 				  System.out.println( "Please enter a numeric dollar amount");
 				  dollarCount = keyboard.next();
 			 }
-			 cents = dollarCount * DOLLARS;
+			 
+			 try{
+				cents = Integer.parseInt(dollarCount); 
+			 }catch(NumberFormatException nfe){
+				  System.out.println("Please enter a numeric dollar amount.");
+				  continue;
+			 }
+			 
+			 cents = cents * DOLLARS;
 			
-			int availableBal = getAvailableBalance();
+			int availableBal = coinMacine.getAvailableBalance();
 		    System.out.println("Available Balance: " + availableBal);
 			
 			if(cents <= availableBal){
-				qtr = coinDispenseMap.get(COIN_QUARTERS);
+				qrtr = coinMacine.coinDispenseMap.get(COIN_QUARTERS);
 				if(qrtr != null){
 					 // compute total quantities of quarter, dimes, nickels, and cents
 					 numQuarters = cents/QUARTERS;
@@ -315,7 +322,7 @@ public class CoinVendingService{
 				}
 				
 				if(centsLeft > 0 ){
-					dim = coinDispenseMap.get(COIN_DIMES);
+					dim = coinMacine.coinDispenseMap.get(COIN_DIMES);
 					if(dim != null){
 						 
 						 numDimes = cents/DIMES;
@@ -326,7 +333,7 @@ public class CoinVendingService{
 					}
 					
 					if(centsLeft > 0 ){
-						nickl = coinDispenseMap.get(COIN_NICKELS);
+						nickl = coinMacine.coinDispenseMap.get(COIN_NICKELS);
 						if(nickl != null){
 							 numNickels = cents/NICKELS;
 							 if(numNickels > nickl){
@@ -337,10 +344,8 @@ public class CoinVendingService{
 					}
 				}//End of Quater
 				
-				reduceCoinQuantity(COIN_QUARTERS, numQuarters);
-				reduceCoinQuantity(COIN_DIMES, numDimes);
-				reduceCoinQuantity(COIN_NICKELS, numNickels);
-				reduceCoinQuantity(COIN_CENTS, centsLeft);
+				coinMacine.adjustCoinQuantity(numQuarters, numDimes, numDimes, centsLeft);
+				
 			
 			 // Log resulting number of coins
 			  System.out.print("For total cents of  " + cents);
