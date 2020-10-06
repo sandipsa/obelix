@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 public class CoinVendingService{
 
 	@Value("${coin-type.qty-mapping}")
-	private String coinTypeMapping;
+	protected String coinTypeMapping;
 
 	 private static final String COIN_QUARTERS = "QUARTERS";
 	 private static final String COIN_DIMES = "DIMES";
