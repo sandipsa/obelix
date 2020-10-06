@@ -345,7 +345,7 @@ public class CoinVendingService{
 						 if(numDimes > dim){
 							numDimes = dim;
 						 }
-						 centsLeft = cents - numDimes*DIMES;
+						 centsLeft = centsLeft - numDimes*DIMES;
 					}
 					
 					if(centsLeft > 0 ){
@@ -355,7 +355,7 @@ public class CoinVendingService{
 							 if(numNickels > nickl){
 								numNickels = nickl;
 							 }
-							 centsLeft = cents - numNickels*NICKELS;
+							 centsLeft = centsLeft - numNickels*NICKELS;
 						}
 					}
 				}//End of Quater
