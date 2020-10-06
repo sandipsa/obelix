@@ -52,7 +52,7 @@ public class CoinVendingServiceTest{
 	
 	@Test
 	public void testAdjustCoinQty() throws Exception{
-		boolean isAdjusted =  coinMachine.adjustQuantity(20, 10, 12, 15);
+		boolean isAdjusted =  coinMachine.adjustCoinQuantity(20, 10, 12, 15);
 		assertTrue(isAdjusted);
 	}
 }
