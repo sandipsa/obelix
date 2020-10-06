@@ -360,7 +360,7 @@ public class CoinVendingService{
 					}
 				}//End of Quater
 				
-				coinMacine.adjustCoinQuantity(numQuarters, numDimes, numDimes, centsLeft);
+				coinMacine.adjustCoinQuantity(numQuarters, numDimes, numNickels, centsLeft);
 				
 			
 			 // Log resulting number of coins
