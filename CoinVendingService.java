@@ -145,6 +145,7 @@ public class CoinVendingService{
 			  System.out.println("#pennies = " + centsLeft);
 		}else{
 			 System.out.println("Coin Machine doesn't have sufficient balance to dispense");
+			return "Coin Machine doesn't have sufficient balance to dispense";
 		}
 		
 		StringBuilder sb = new StringBuilder();
@@ -267,6 +268,7 @@ public class CoinVendingService{
 				
 		}else{
 			 System.out.println("Coin Machine doesn't have sufficient balance to dispense");
+			return "Coin Machine doesn't have sufficient balance to dispense";
 		}
 		
 		StringBuilder sb = new StringBuilder();
