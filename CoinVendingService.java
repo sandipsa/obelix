@@ -33,7 +33,7 @@ public class CoinVendingService{
 		String[] coinType = coinTypeMapping.split(";", 0);
 		for(String coinAttr: coinType){
 			String[] strCoinAttr = coinAttr.split(":");
-			coinDispenseMap.put(strCoinAttr[0], Integer.parseInt(strCoinAttr[1]);
+			coinDispenseMap.put(strCoinAttr[0], Integer.parseInt(strCoinAttr[1]));
 		}
 	 }
 	 
@@ -269,7 +269,23 @@ public class CoinVendingService{
 			 System.out.println("Coin Machine doesn't have sufficient balance to dispense");
 		}
 		
+		StringBuilder sb = new StringBuilder();
+		if(numQuarters >0){
+			sb.append(" Quarters = " + numQuarters);
+			
+		}
 		
+		if(numDimes >0){
+			sb.append(", Dimes = " + numDimes);
+		}
+		if(numNickels >0){
+			sb.append(", Nickels = " + numNickels);
+		}
+		if(centsLeft >0){
+			sb.append(", Pennies = " + penny);
+		}
+		
+		return sb.toString();
 	 }
 	 
 	 public static void main(String[] args){
