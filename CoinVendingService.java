@@ -55,18 +55,18 @@ public class CoinVendingService{
 		}
 		coins = coinDispenseMap.get(COIN_DIMES);
 		if(coins != null){
-			runningTotal = coins.intValue()*DIMES;
+			runningTotal = runningTotal + coins.intValue()*DIMES;
 		}
 		coins = coinDispenseMap.get(COIN_NICKELS);
 		
 		if(coins != null){
-			runningTotal = coins.intValue()*NICKELS;
+			runningTotal = runningTotal + coins.intValue()*NICKELS;
 		}
 		
 		coins = coinDispenseMap.get(COIN_CENTS);
 		
 		if(coins != null){
-			runningTotal = coins.intValue();
+			runningTotal = runningTotal + coins.intValue();
 		}
 		
 		return runningTotal;
