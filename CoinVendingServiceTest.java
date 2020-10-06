@@ -10,10 +10,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJunitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 
-@RunWith(MockitoJunitRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class CoinVendingServiceTest{
 	@InjectMocks
 	private CoinVendingService coinMachine;
@@ -23,24 +23,23 @@ public class CoinVendingServiceTest{
 	@Before
 	public void setup() throws Exception{
 	  String coinTypMapping = "QUARTERS:100;DIMES:100;NICKELS:100;CENTS:100";
-	  coinMachine.cointTypeMapping = coinTypMapping;
+	  coinMachine.coinTypeMapping = coinTypMapping;
 	  coinMachine.loadCoins();
 	}
 	
 	@Test
-	public void testNormalDispense(){
+	public void testNormalDispense() throws Exception{
 		Scanner fileChunks = new Scanner(new File("src/test/resources/dollarInput1.txt"));
 		//while(fileChunks.hasNextInt()){
 			String msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
-			assertEquls(" Quarts = 40", msg);
-			String msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
-			assertEquls(" Quarts = 44", msg);
-		        String msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
-			assertEquls("Coin Machine doesn't have sufficient balance to dispense", msg);
-			String msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
-			assertEquls(" Quarts = 8", msg);
-		
-		        String msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
-			assertEquls("Please enter a numeric dollar amount. The value entered : ws", msg);
+			assertEquals(" Quarts = 40", msg);
+			msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
+			assertEquals(" Quarts = 44", msg);
+		        msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
+			assertEquals("Coin Machine doesn't have sufficient balance to dispense", msg);
+			msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
+			assertEquals(" Quarts = 8", msg);
+		        msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
+			assertEquals("Please enter a numeric dollar amount. The value entered : ws", msg);
  	}
 }
