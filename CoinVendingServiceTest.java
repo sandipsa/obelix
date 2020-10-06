@@ -32,13 +32,13 @@ public class CoinVendingServiceTest{
 		Scanner fileChunks = new Scanner(new File("src/test/resources/dollarInput1.txt"));
 		//while(fileChunks.hasNextInt()){
 			String msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
-			assertEquals(" Quarts = 40", msg);
+			assertEquals(" Quarters = 40", msg);
 			msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
-			assertEquals(" Quarts = 44", msg);
+			assertEquals(" Quarters = 44", msg);
 		        msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
 			assertEquals("Coin Machine doesn't have sufficient balance to dispense", msg);
 			msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
-			assertEquals(" Quarts = 8", msg);
+			assertEquals(" Quarters = 8", msg);
 		        msg = coinMachine.dispenseCoinsForBills(fileChunks.next());
 			assertEquals("Please enter a numeric dollar amount. The value entered : ws", msg);
  	}
